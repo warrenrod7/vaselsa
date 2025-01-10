@@ -1,9 +1,10 @@
 // app/layout.tsx
+import Footer from '@/components/footer';
 import './globals.css';
 import Navbar from '@/components/navbar';
 
 export const metadata = {
-  title: 'My Next.js App',
+  title: 'Vaselsa',
   description: 'A simple Next.js project with Tailwind CSS',
 };
 
@@ -14,9 +15,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-gray-50 text-gray-800">
+      <body className=" text-gray-800">
         <Navbar />
-        <main className="container mx-auto p-6">{children}</main>
+        <main>{children}</main>
+        <Footer/>
       </body>
     </html>
   );
