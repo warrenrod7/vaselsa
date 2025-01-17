@@ -2,6 +2,7 @@
 import Footer from '@/components/footer';
 import './globals.css';
 import Navbar from '@/components/navbar';
+import { CartProvider } from '@/context/CartContext';
 
 export const metadata = {
   title: 'Vaselsa',
@@ -16,9 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className=" text-gray-800">
-        <Navbar />
-        <main>{children}</main>
-        <Footer/>
+        <CartProvider>
+          <Navbar />
+          <main>{children}</main>
+          <Footer/>
+        </CartProvider>
       </body>
     </html>
   );
