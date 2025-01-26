@@ -7,7 +7,7 @@ import { IoIosSearch } from "react-icons/io";
 
 const Navbar = () => {
   return (
-    <nav className="bg-white shadow-md px-6 py-4 ">
+    <nav className="bg-white shadow-md px-6 py-4  ">
       <div className="flex items-center justify-between">
         {/* Company Logo */}
         <div className="flex items-center">

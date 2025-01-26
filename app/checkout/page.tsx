@@ -1,30 +1,54 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
+import Script from 'next/script';
 
 interface AddressForm {
   fullName: string;
   streetAddress: string;
+  landmark: string;
   city: string;
   state: string;
   pincode: string;
   phone: string;
 }
 
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function Checkout() {
   const { items } = useCart();
   const router = useRouter();
-  const total = items.reduce((sum, item) => sum + item.price, 0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   
   const [address, setAddress] = useState<AddressForm>({
     fullName: '',
     streetAddress: '',
+    landmark: '',
     city: '',
     state: '',
     pincode: '',
     phone: '',
   });
+
+  useEffect(() => {
+    // Wait for cart data to be loaded
+    const checkCart = () => {
+      setIsLoading(false);
+      if (items.length === 0) {
+        router.push('/cart');
+      }
+    };
+
+    checkCart();
+  }, [items, router]);
+
+  const total = items.reduce((sum, item) => sum + item.price, 0);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,69 +58,110 @@ export default function Checkout() {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Here you would typically send this data to your backend
-    console.log('Order details:', {
-      items,
-      address,
-      total
-    });
-    
-    // For now, just show an alert
-    alert('Order placed successfully!');
-    router.push('/');
+    if (!isScriptLoaded) {
+      alert('Payment system is initializing. Please try again.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: total,
+        }),
+      });
+      
+      const order = await response.json();
+      
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+        amount: total * 100,
+        currency: "INR",
+        name: "Vaselsa",
+        description: "Purchase Description",
+        order_id: order.id,
+        handler: async function (response: any) {
+          // Verify payment
+          const verifyResponse = await fetch('/api/verify-payment', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            }),
+          });
+
+          if (verifyResponse.ok) {
+            alert('Payment successful!');
+            router.push('/');
+          }
+        },
+        prefill: {
+          name: address.fullName,
+          contact: address.phone,
+        },
+      };
+
+      const paymentObject = new (window as any).Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Something went wrong!');
+    }
   };
 
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => setIsScriptLoaded(true);
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  if (isLoading) {
+    return <div className="max-w-2xl mx-auto p-6">Loading...</div>;
+  }
+
   if (items.length === 0) {
-    router.push('/cart');
     return null;
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6">Shipping Address</h1>
-      
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Full Name
-          </label>
-          <input
-            type="text"
-            name="fullName"
-            required
-            value={address.fullName}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Street Address
-          </label>
-          <input
-            type="text"
-            name="streetAddress"
-            required
-            value={address.streetAddress}
-            onChange={handleInputChange}
-            className="w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+    <>
+      <Script
+        src="https://checkout.razorpay.com/v1/checkout.js"
+        strategy="lazyOnload"
+        onLoad={() => setIsScriptLoaded(true)}
+        onError={(e) => {
+          console.error('Script failed to load', e);
+          alert('Failed to load payment system');
+        }}
+      />
+      <div className="max-w-2xl mx-auto p-6">
+        <h1 className="text-2xl font-bold mb-6">Shipping Address</h1>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              City
+              Full Name
             </label>
             <input
               type="text"
-              name="city"
+              name="fullName"
               required
-              value={address.city}
+              value={address.fullName}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-md p-2"
             />
@@ -104,64 +169,108 @@ export default function Checkout() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              State
+              Street Address
             </label>
             <input
               type="text"
-              name="state"
+              name="streetAddress"
               required
-              value={address.state}
+              value={address.streetAddress}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-md p-2"
             />
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              PIN Code
+              Landmark
             </label>
             <input
               type="text"
-              name="pincode"
+              name="landmark"
               required
-              pattern="[0-9]{6}"
-              value={address.pincode}
+              value={address.landmark}
               onChange={handleInputChange}
               className="w-full border border-gray-300 rounded-md p-2"
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              name="phone"
-              required
-              pattern="[0-9]{10}"
-              value={address.phone}
-              onChange={handleInputChange}
-              className="w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-        </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                City
+              </label>
+              <input
+                type="text"
+                name="city"
+                required
+                value={address.city}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
 
-        <div className="mt-6 border-t pt-6">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-lg font-semibold">Total Amount:</span>
-            <span className="text-lg font-bold">INR {total.toFixed(2)}</span>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                State
+              </label>
+              <input
+                type="text"
+                name="state"
+                required
+                value={address.state}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
           </div>
-          <button
-            type="submit"
-            className="w-full h-12 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors"
-          >
-            Place Order (INR {total.toFixed(2)})
-          </button>
-        </div>
-      </form>
-    </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                PIN Code
+              </label>
+              <input
+                type="text"
+                name="pincode"
+                required
+                pattern="[0-9]{6}"
+                value={address.pincode}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Phone Number
+              </label>
+              <input
+                type="tel"
+                name="phone"
+                required
+                pattern="[0-9]{10}"
+                value={address.phone}
+                onChange={handleInputChange}
+                className="w-full border border-gray-300 rounded-md p-2"
+              />
+            </div>
+          </div>
+
+          <div className="pt-6">
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-semibold">Total Amount:</span>
+              <span className="text-lg font-bold">INR {total.toFixed(2)}</span>
+            </div>
+            <button
+              type="submit"
+              className="w-full h-12 bg-green-500 text-white py-3 rounded-md hover:bg-green-600 transition-colors"
+            >
+              Place Order (INR {total.toFixed(2)})
+            </button>
+          </div>
+        </form>
+      </div>
+    </>
   );
 } 

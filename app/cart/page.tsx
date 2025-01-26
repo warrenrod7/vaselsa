@@ -7,10 +7,6 @@ export default function Cart() {
   const router = useRouter();
   const total = items.reduce((sum, item) => sum + item.price, 0);
 
-  const handleCheckout = () => {
-    router.push('/checkout');
-  };
-
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-2xl font-bold mb-6">Shopping Cart</h1>
@@ -20,7 +16,7 @@ export default function Cart() {
         <>
           <div className="space-y-4">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow">
+              <div key={item.id} className="flex items-center justify-between bg-white p-4">
                 <div className="flex items-center space-x-4">
                   <img src={item.image} alt={item.name} className="w-16 h-16 object-contain" />
                   <div>
@@ -40,10 +36,10 @@ export default function Cart() {
           <div className="mt-6 text-right">
             <p className="text-xl font-bold">Total: INR {total.toFixed(2)}</p>
             <button 
-              onClick={handleCheckout}
+              onClick={() => router.push('/checkout')}
               className="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 transition-colors"
             >
-              Proceed to Checkout
+              Checkout
             </button>
           </div>
         </>

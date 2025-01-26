@@ -11,7 +11,7 @@ export default function ProductPage() {
     id: 'tshirt1',
     name: 'Classic T-Shirt 1',
     price: 29.99,
-    image: '/tshirt.jpg'
+    image: '/tshirt.jpeg'
   };
 
   const handleAddToCart = () => {
@@ -47,7 +47,7 @@ export default function ProductPage() {
       <div className="flex flex-col md:flex-row gap-10">
         <div className="w-full md:w-1/2">
           <img
-            src="/tshirt.jpg"
+            src="/tshirt.jpeg"
             alt="Classic T-Shirt"
             className="w-full h-full object-contain"
           />

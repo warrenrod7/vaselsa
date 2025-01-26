@@ -11,7 +11,7 @@ export default function ProductPage() {
     id: 'tshirt1',
     name: 'Classic T-Shirt 1',
     price: 29.99,
-    image: '/tshirt.jpg'
+    image: '/tshirt.jpeg'
   };
 
   const handleAddToCart = () => {
