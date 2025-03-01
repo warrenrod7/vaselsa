@@ -1,6 +1,6 @@
 // app/layout.tsx
 import Footer from '@/components/footer';
-import './globals.css';
+import '../globals.css';
 import Navbar from '@/components/navbar';
 import { CartProvider } from '@/context/CartContext';
 
