@@ -96,7 +96,7 @@ export default function SignupPage() {
     >
       <div className="flex flex-col items-center justify-center min-h-screen w-full p-4 sm:p-6">
         <div className="flex justify-center mb-6">
-          <h2 className="font-bold text-5xl sm:text-6xl">VASELSA</h2>
+          <h2 className="font-bold text-5xl sm:text-5xl">VASELSA</h2>
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex justify-center">
@@ -109,7 +109,7 @@ export default function SignupPage() {
         <form onSubmit={handleSignup} className="space-y-4 w-full max-w-md sm:max-w-lg">
           {/* First & Last Name */}
           <div className="flex flex-wrap gap-4">
-            <div className="flex flex-col w-full sm:w-1/2">
+            <div className="flex flex-col w-full sm:w-full">
               <label
                 htmlFor="firstName"
                 className="text-sm font-medium text-gray-700 mb-1"
@@ -120,13 +120,13 @@ export default function SignupPage() {
                 id="firstName"
                 type="text"
                 placeholder="First Name"
-                className="px-2 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
               />
             </div>
-            <div className="flex flex-col w-full sm:w-1/2">
+            <div className="flex flex-col w-full sm:w-full">
               <label
                 htmlFor="lastName"
                 className="text-sm font-medium text-gray-700 mb-1"
@@ -137,7 +137,7 @@ export default function SignupPage() {
                 id="lastName"
                 type="text"
                 placeholder="Last Name"
-                className="px-2 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 required

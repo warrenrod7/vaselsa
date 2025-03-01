@@ -17,7 +17,7 @@ const Navbar = () => {
         {/* Navigation Links */}
         <ul className="flex space-x-6 text-gray-800 font-medium">
         <li>
-            <Link href="/search">
+            <Link href="/temp">
               <div className="flex items-center space-x-1">
                 <IoIosSearch className="text-3xl" />
                 
