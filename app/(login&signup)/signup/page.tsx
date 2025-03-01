@@ -96,7 +96,7 @@ export default function SignupPage() {
     >
       <div className="flex flex-col items-center justify-center min-h-screen w-full p-4 sm:p-6">
         <div className="flex justify-center mb-6">
-          <h2 className="font-bold text-4xl sm:text-6xl">VASELSA</h2>
+          <h2 className="font-bold text-5xl sm:text-6xl">VASELSA</h2>
         </div>
 
         <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 flex justify-center">
@@ -219,6 +219,16 @@ export default function SignupPage() {
           >
             {loading ? "Signing up..." : "Sign Up"}
           </button>
+          <p className="text-center text-gray-600">
+          Already have an account?{" "}
+          <button
+            type="button"
+            className="text-gray-600 hover:underline"
+            onClick={() => router.push("/login")}
+          >
+            Log in
+          </button>
+        </p>
         </form>
       </div>
     </div>
