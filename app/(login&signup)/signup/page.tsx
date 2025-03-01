@@ -83,7 +83,7 @@ export default function SignupPage() {
         setSuccess("Signup successful! Redirecting...");
         setTimeout(() => router.push("/login"), 2000);
       }
-    } catch (err) {
+    } catch  {
       setError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);

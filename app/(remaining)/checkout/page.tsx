@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useEffect } from 'react';
 import { useCart } from '@/context/CartContext';
 import { useRouter } from 'next/navigation';
@@ -14,9 +15,33 @@ interface AddressForm {
   phone: string;
 }
 
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: {
+    name: string;
+    contact: string;
+  };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+}
+
+interface RazorpayResponse {
+  razorpay_payment_id: string;
+  razorpay_order_id: string;
+  razorpay_signature: string;
+}
+
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
   }
 }
 
@@ -25,7 +50,7 @@ export default function Checkout() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
-  
+
   const [address, setAddress] = useState<AddressForm>({
     fullName: '',
     streetAddress: '',
@@ -37,14 +62,12 @@ export default function Checkout() {
   });
 
   useEffect(() => {
-    // Wait for cart data to be loaded
     const checkCart = () => {
       setIsLoading(false);
       if (items.length === 0) {
         router.push('/cart');
       }
     };
-
     checkCart();
   }, [items, router]);
 
@@ -52,15 +75,15 @@ export default function Checkout() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setAddress(prev => ({
+    setAddress((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isScriptLoaded) {
       alert('Payment system is initializing. Please try again.');
       return;
@@ -76,28 +99,23 @@ export default function Checkout() {
           amount: total,
         }),
       });
-      
+
       const order = await response.json();
-      
-      const options = {
-        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+
+      const options: RazorpayOptions = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || '',
         amount: total * 100,
-        currency: "INR",
-        name: "Vaselsa",
-        description: "Purchase Description",
+        currency: 'INR',
+        name: 'Vaselsa',
+        description: 'Purchase Description',
         order_id: order.id,
-        handler: async function (response: any) {
-          // Verify payment
+        handler: async (response: RazorpayResponse) => {
           const verifyResponse = await fetch('/api/verify-payment', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
-            body: JSON.stringify({
-              razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_order_id: response.razorpay_order_id,
-              razorpay_signature: response.razorpay_signature,
-            }),
+            body: JSON.stringify(response),
           });
 
           if (verifyResponse.ok) {
@@ -111,7 +129,7 @@ export default function Checkout() {
         },
       };
 
-      const paymentObject = new (window as any).Razorpay(options);
+      const paymentObject = new window.Razorpay(options);
       paymentObject.open();
     } catch (error) {
       console.error('Error:', error);
@@ -151,7 +169,7 @@ export default function Checkout() {
       />
       <div className="max-w-2xl mx-auto p-6">
         <h1 className="text-2xl font-bold mb-6">Shipping Address</h1>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -273,4 +291,4 @@ export default function Checkout() {
       </div>
     </>
   );
-} 
+}
