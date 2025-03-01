@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
-import Image from "next/image";
+
 
 export default function SignupPage() {
   const [firstName, setFirstName] = useState("");
