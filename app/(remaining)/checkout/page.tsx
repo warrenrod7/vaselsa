@@ -110,7 +110,7 @@ export default function Checkout() {
         description: 'Purchase Description',
         order_id: order.id,
         handler: async (response: RazorpayResponse) => {
-          const verifyResponse = await fetch('/api/verify-payment', {
+          const verifyResponse = await fetch('/api/verifyOrder', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ export default function Checkout() {
 
           if (verifyResponse.ok) {
             alert('Payment successful!');
-            router.push('/');
+            router.push('/payment-success');
           }
         },
         prefill: {

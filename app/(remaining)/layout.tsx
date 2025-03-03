@@ -6,7 +6,7 @@ import { CartProvider } from '@/context/CartContext';
 
 export const metadata = {
   title: 'Vaselsa',
-  description: 'A simple Next.js project with Tailwind CSS',
+  description: 'Aesthetic Supermarket',
 };
 
 export default function RootLayout({
