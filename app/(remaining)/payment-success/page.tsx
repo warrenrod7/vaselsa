@@ -1,5 +1,5 @@
 import Image from "next/image";
-export default function(){
+export default function success(){
     return(
         <div className="h-full items-center flex justify-center flex-col">
             <h1 className="text-4xl mt-8 mb-2">Order Placed</h1>
